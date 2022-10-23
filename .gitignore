@@ -1,0 +1,6 @@
+.idea
+.ipynb_checkpoints
+Untitled.ipynb
+venv/Lib/
+venv/Scripts/
+venv/pyenv.cfg
