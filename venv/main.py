@@ -1,3 +1,5 @@
+import os
+import sys
 from flask import Flask, request, jsonify
 import joblib
 import traceback
@@ -10,14 +12,35 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def avail():
-    
+    return "1: Random Forest Classifier, 2: Logistic Regression"
+
+@app.route('/<int:id>', methods=['DELETE'])
+def delete(id):
+    if id == 1:
+        path = 'C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/rf.pkl'
+    elif id == 2:
+        path = 'C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/lr.pkl'
+    else:
+        return "Nice try, bro \n again..."
+    if os.path.isfile(path):
+        os.remove(path)
+        return f'{path} deleted!!!'
+    else:
+        return "No such file :c"
 
 @app.route('/prediction/<int:id>', methods=['POST'])
 def predict(id):
+
     if id == 1:
-        model = rf
+        if os.path.isfile(path):
+            model = joblib.load("C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/rf.pkl")
+        else:
+            return "Fit at first"
     elif id == 2:
-        model = lr
+        if os.path.isfile(path):
+            model = joblib.load("C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/lr.pkl")
+        else:
+            return "Fit at first"
     else:
         return 'Nice try, bro'
 
@@ -45,10 +68,10 @@ def refit(id):
         try:
             query = request.json
             print(query)
-            if id == 2:
+            if id == 1:
                 type = 'RFclf'
                 model = RandomForestClassifier(**query)
-            elif id == 1:
+            elif id == 2:
                 type = 'LR'
                 model = LogisticRegression(**query)
             model.fit(X_train,y_train)
@@ -62,8 +85,5 @@ if __name__ == '__main__':
         port = int(sys.argv[1])
     except:
         port = 12345
-        rf = joblib.load("C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/rf.pkl")
-        lr = joblib.load("C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/lr.pkl")
-        print ('Model loaded')
         rnd_columns = joblib.load('C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/cols.pkl') # Load “rnd_columns.pkl”
         app.run(port=port, debug=True)
