@@ -13,12 +13,20 @@
 
 
 ### Пример использования
-*Предикт
+-Предикт
+
 curl -X POST -H 'Content-Type: application/json' -d @test.json http://127.0.0.1:12345/prediction/1
-*Переобучить с параметрами
+
+-Переобучить с параметрами
+
 curl -X POST -H 'Content-Type: application/json' -d @params_rf.json http://127.0.0.1:12345/refit/1
+
 curl -X POST -H 'Content-Type: application/json' -d @params.json http://127.0.0.1:12345/refit/1
-*удалить модельку
+
+-удалить модельку
+
 curl -X DELETE http://127.0.0.1:12345/1
-*получить пул моделек
+
+-получить пул моделек
+
 curl -X GET http://127.0.0.1:12345/
