@@ -6,9 +6,12 @@ import traceback
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-
+import pathlib
+import pickle
 app = Flask(__name__)
 # api.model()
+
+main_path = os.getcwd()+'\\'
 
 @app.route('/', methods=['GET'])
 def avail():
@@ -17,9 +20,9 @@ def avail():
 @app.route('/<int:id>', methods=['DELETE'])
 def delete(id):
     if id == 1:
-        path = 'C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/rf.pkl'
+        path = main_path + 'rf.pkl'
     elif id == 2:
-        path = 'C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/lr.pkl'
+        path = main_path + 'lr.pkl'
     else:
         return "Nice try, bro \n again..."
     if os.path.isfile(path):
@@ -30,15 +33,16 @@ def delete(id):
 
 @app.route('/prediction/<int:id>', methods=['POST'])
 def predict(id):
-
     if id == 1:
+        path = main_path + 'rf.pkl'
         if os.path.isfile(path):
-            model = joblib.load("C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/rf.pkl")
+            model = joblib.load(path)
         else:
             return "Fit at first"
     elif id == 2:
+        path = main_path + 'lr.pkl'
         if os.path.isfile(path):
-            model = joblib.load("C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/lr.pkl")
+            model = joblib.load(path)
         else:
             return "Fit at first"
     else:
@@ -69,12 +73,13 @@ def refit(id):
             query = request.json
             print(query)
             if id == 1:
-                type = 'RFclf'
+                type = 'rf.pkl'
                 model = RandomForestClassifier(**query)
             elif id == 2:
-                type = 'LR'
+                type = 'lr.pkl'
                 model = LogisticRegression(**query)
             model.fit(X_train,y_train)
+            pickle.dump(model, open(main_path+type, 'wb'))
             return (f'model {type} refitting with parameters {query}')
         except:
             return jsonify({'trace': traceback.format_exc()})
@@ -85,5 +90,5 @@ if __name__ == '__main__':
         port = int(sys.argv[1])
     except:
         port = 12345
-        rnd_columns = joblib.load('C:/Users/user/ipynbs/MLOPS/HW1/MLOPS_REST/cols.pkl') # Load “rnd_columns.pkl”
+        rnd_columns = joblib.load(main_path + 'cols.pkl') # Load “rnd_columns.pkl”
         app.run(port=port, debug=True)
