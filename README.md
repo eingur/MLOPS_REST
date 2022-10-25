@@ -17,15 +17,18 @@
 
 curl -X POST -H 'Content-Type: application/json' -d @test.json http://127.0.0.1:12345/prediction/1
 
+curl -X POST -H 'Content-Type: application/json' -d @test.json http://127.0.0.1:12345/prediction/2
 - Переобучить с параметрами
 
 curl -X POST -H 'Content-Type: application/json' -d @params_rf.json http://127.0.0.1:12345/refit/1
 
-curl -X POST -H 'Content-Type: application/json' -d @params.json http://127.0.0.1:12345/refit/1
+curl -X POST -H 'Content-Type: application/json' -d @params.json http://127.0.0.1:12345/refit/2
 
 - удалить модельку
 
 curl -X DELETE http://127.0.0.1:12345/1
+
+curl -X DELETE http://127.0.0.1:12345/2
 
 - получить пул моделек
 
