@@ -9,7 +9,6 @@ from sklearn.ensemble import RandomForestClassifier
 import pathlib
 import pickle
 app = Flask(__name__)
-# api.model()
 
 main_path = os.getcwd()+'\\'
 
