@@ -16,14 +16,14 @@ app = Flask(__name__)
 api = Api()
 api.init_app(app)
 
-main_path = os.getcwd()+'\\'
+main_path = os.getcwd()+'/'
 
 
 def get_path(path, id):
     if id == 1:
-        return main_path + 'models\\' + 'rf.pkl'
+        return main_path + 'models/' + 'rf.pkl'
     elif id == 2:
-        return main_path + 'models\\' + 'lr.pkl'
+        return main_path + 'models/' + 'lr.pkl'
     else:
         return None
 
@@ -137,5 +137,5 @@ if __name__ == '__main__':
         port = int(sys.argv[1])
     except:
         port = 12345
-        rnd_columns = joblib.load(main_path + 'models\\' + 'cols.pkl')
+        rnd_columns = joblib.load(main_path + 'models/' + 'cols.pkl')
         app.run(port=port, debug=True)
