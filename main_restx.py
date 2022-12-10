@@ -138,6 +138,5 @@ if __name__ == '__main__':
     except:
         port = 12345
         print(main_path + 'models/' + 'cols.pkl')
-        print("Directory Path:", Path().absolute())
         rnd_columns = joblib.load(main_path + 'models/' + 'cols.pkl')
         app.run(port=port, debug=True)
