@@ -136,7 +136,7 @@ if __name__ == '__main__':
         print(sys.argv[1])
         port = int(sys.argv[1])
     except:
-        port = 12345
+        port = 8080
         print(main_path + 'models/' + 'cols.pkl')
         rnd_columns = joblib.load(main_path + 'models/' + 'cols.pkl')
         app.run(port=port, debug=True)
