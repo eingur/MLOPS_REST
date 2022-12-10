@@ -16,7 +16,7 @@ app = Flask(__name__)
 api = Api()
 api.init_app(app)
 
-main_path = os.getcwd()+'/'
+main_path = ''#os.getcwd()+'/'
 
 
 def get_path(path, id):
