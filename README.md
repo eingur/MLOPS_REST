@@ -13,21 +13,29 @@
 
 
 ### Пример использования
+конструктор докер образа 
+ 
+ docker build . eingur/mlops_ml:0.1
+ 
+ docker-compose up -d
+ 
+ хост: http://127.0.0.1:5000
+ 
 - Предикт
 
-curl -X POST -H 'Content-Type: application/json' -d @test.json http://127.0.0.1:12345/prediction/1
+curl -X POST -H 'Content-Type: application/json' -d @test.json http://127.0.0.1:5000/prediction/1
 
-curl -X POST -H 'Content-Type: application/json' -d @test.json http://127.0.0.1:12345/prediction/2
+curl -X POST -H 'Content-Type: application/json' -d @test.json http://127.0.0.1:5000/prediction/2
 - Переобучить с параметрами
 
-curl -X POST -H 'Content-Type: application/json' -d @train.json http://127.0.0.1:12345/refit/2
+curl -X POST -H 'Content-Type: application/json' -d @train.json http://127.0.0.1:5000/refit/2
 
 - удалить модельку
 
-curl -X DELETE http://127.0.0.1:12345/1
+curl -X DELETE http://127.0.0.1:5000/1
 
-curl -X DELETE http://127.0.0.1:12345/2
+curl -X DELETE http://127.0.0.1:5000/2
 
 - получить пул моделек
 
-curl -X GET http://127.0.0.1:12345/
+curl -X GET http://127.0.0.1:5000/
