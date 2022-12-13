@@ -10,4 +10,4 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade pip \
   && pip install --no-cache-dir -r requirements.txt
 
-CMD python3 /app/main_restx.py
+CMD python3 /app/main.py
