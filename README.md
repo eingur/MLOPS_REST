@@ -21,6 +21,8 @@
  
  хост: http://127.0.0.1:5000
  
+ докерхаб:https://hub.docker.com/repository/docker/eingur/mlops_ml
+
 - Предикт
 
 curl -X POST -H 'Content-Type: application/json' -d @test.json http://127.0.0.1:5000/prediction/1
