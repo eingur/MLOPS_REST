@@ -4,3 +4,5 @@ Untitled.ipynb
 venv/Lib/
 venv/Scripts/
 venv/pyenv.cfg
+__pycache__/
+db/__pycache__/
