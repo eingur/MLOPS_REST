@@ -3,23 +3,24 @@ version: '3.9'
 services:
   web:
     build: .
-    command: python3 app/main_restx.py
+    # command: python3 /app/main_restx.py
+    depends_on:
+      - postgres
     volumes:
-      - .:/usr/src/app
+      - .:/app
     ports:
-      - "8000:5000"
+      - "5000:5000"
   postgres:
-    image: postgres:13.3
+    image: postgres:13.9-alpine
     restart: always
     environment:
-      POSTGRES_USER: 'eingur'
-      POSTGRES_PASSWORD: '1234'
-      POSTGRES_DB: 'train_df'
-      PGDATA: "/var/lib/postgresql/data/pgdata"
+      - POSTGRES_USER=eingur
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=ml_db
     ports:
-      - "1234:1234"
+      - "5432:5432"
     volumes:
-      - .:/var/lib/postgresql/data
-      - ../2. Init Database:/docker-entrypoint-initdb.d
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data:/var/lib/postgresql/data
   
 

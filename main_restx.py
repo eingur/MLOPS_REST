@@ -2,7 +2,7 @@ import os
 import sys
 from flask import Flask, request, jsonify
 import flask
-from flask_restx import Api, Resource, fields, abort
+from flask_restx import Api, Resource, fields, abort, reqparse
 import joblib
 import traceback
 import pandas as pd
@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 import pathlib
 import pickle
-from fit_and_save_model import fit_model
+from fit_and_save_model import fit_model, load_model
 app = Flask(__name__)
 api = Api()
 api.init_app(app)
@@ -21,9 +21,9 @@ main_path = ''#os.getcwd()+'/'
 
 def get_path(path, id):
     if id == 1:
-        return main_path + 'models/' + 'rf.pkl'
+        return main_path + 'models/rf/' + 'rf.pkl'
     elif id == 2:
-        return main_path + 'models/' + 'lr.pkl'
+        return main_path + 'models/lr/' + 'lr.pkl'
     else:
         return None
 
@@ -44,6 +44,9 @@ class Descr(Resource):
             return jsonify({'status': 'file removed', 'file': path}), 200
         abort(404, "File {} doesn't exist".format(path))
 
+parser = reqparse.RequestParser()
+parser.add_argument('data', type=json.loads, help='data for predict')
+parser.add_argument('parameters',json.loads)
 
 @api.route('/prediction/<int:id>')
 class Prediction(Resource):
@@ -51,14 +54,18 @@ class Prediction(Resource):
              responses={200: 'Request is correct', 400: 'Bad request'})
     def post(self, id):
         """Get prediction with posted data"""
-        path = get_path(main_path, id)
-        if os.path.isfile(path):
-            model = joblib.load(path)
-        else:
-            return "File {} doesn't exist".format(path), 404
-        if model:
+        args = parser.parse_args()#request.json
+        params = args['parameters']
+        model = load_model(id,params)
+        # path = get_path(main_path, id)
+        # if os.path.isfile(path):
+        #     model = joblib.load(path)
+        # else:
+        if not model:
+            return "model with params {} isn't fitted or mismatch.".format(params), 404
+        else :
             try:
-                data_ = request.json
+                data_ = args['data']#request.json
                 print(data_)
                 query = pd.DataFrame(data_)
                 query.columns = rnd_columns
@@ -66,8 +73,7 @@ class Prediction(Resource):
                 return jsonify({'prediction': predict})
             except:
                 return jsonify({'trace': traceback.format_exc()})
-        else:
-            return "Mismatch parameters with model", 400
+
 
 
 @api.route('/refit/<int:id>')
@@ -85,58 +91,13 @@ class Fitting(Resource):
         else:
             return jsonify({'trace': traceback.format_exc()})
 
-    # def post(self, id):
-    #     #
-    #     # X_train = pd.read_csv('train.csv')
-    #     # y_train = pd.read_csv('y_train.csv')
-    #     data = request.args.get('train_data')
-    #     target = request.args.get('train_target')
-    #
-    #     if id !=1 and id !=2:
-    #         return 'Nice try, bro'
-    #     else:
-    #         try:
-    #             query = request.json
-    #             print(query)
-    #             if id == 1:
-    #                 type = 'rf.pkl'
-    #                 model = RandomForestClassifier(**query)
-    #             elif id == 2:
-    #                 type = 'lr.pkl'
-    #                 model = LogisticRegression(**query)
-    #             model.fit(train_data,train_target)
-    #             pickle.dump(model, open(main_path+type, 'wb'))
-    #             return (f'model {type} refitting with parameters {query}')
-    #         except:
-    #             return jsonify({'trace': traceback.format_exc()})
-    # def post(self, id):
-    #     X_train = pd.read_csv('train.csv')
-    #     y_train = pd.read_csv('y_train.csv')
-    #     if id !=1 and id !=2:
-    #         return 'Nice try, bro'
-    #     else:
-    #         try:
-    #             query = request.json
-    #             print(query)
-    #             if id == 1:
-    #                 type = 'rf.pkl'
-    #                 model = RandomForestClassifier(**query)
-    #             elif id == 2:
-    #                 type = 'lr.pkl'
-    #                 model = LogisticRegression(**query)
-    #             model.fit(train_data,train_target)
-    #             pickle.dump(model, open(main_path+type, 'wb'))
-    #             return (f'model {type} refitting with parameters {query}')
-    #         except:
-    #             return jsonify({'trace': traceback.format_exc()})
-
-
+ 
 if __name__ == '__main__':
     try:
         print(sys.argv[1])
         port = int(sys.argv[1])
     except:
-        port = 8080
+        port = 5000
         print(main_path + 'models/' + 'cols.pkl')
         rnd_columns = joblib.load(main_path + 'models/' + 'cols.pkl')
-        app.run(port=port, debug=True)
+        app.run(host = '0.0.0.0', port=port, debug=True)

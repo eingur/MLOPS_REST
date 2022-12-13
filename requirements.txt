@@ -29,3 +29,4 @@ yarg==0.1.9
 zipp==3.9.0
 pandas==1.4.4
 sqlalchemy==1.4.39
+psycopg2==2.9.5 
