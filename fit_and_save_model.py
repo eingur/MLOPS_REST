@@ -6,31 +6,28 @@ import pandas as pd
 import pickle
 import io
 import psycopg2
-from sqlalchemy import select, insert, update
-
+from sqlalchemy import select, insert, update,delete
 from db.db import connection, Weights
 
 
 main_path = os.getcwd()+'\\models\\'
 
+def get_id(id):
+    if id == 1:
+        return 'rf'
+    else:
+        return 'lr'
 
-# def fit_model(train_data, train_target, id, params):
-#     path = main_path
-#     try:
-#         if id == 1:
-#             type = 'rf'
-#             model = RandomForestClassifier(**params)
-#         elif id == 2:
-#             type = 'lr'
-#             model = LogisticRegression(**params)
-#         else:
-#             return 0
-#         model.fit(train_data, train_target)
-#         logs = '_'.join([str(k)+'_'+str(v) for k, v in params.items()])
-#         pickle.dump(model, open(path + type + '\\' + logs + '.pkl', 'wb'))
-#         return 1
-#     except:
-#         return 0
+def load_all_models():
+    statement = select([Weights.model])
+    result = connection.execute(statement).fetchall()
+    return [v[0] for v in result]
+
+def delete_models(model_type):
+    result = delete(Weights).where(Weights.retired.notilike(f'%{model_type}%'))
+    connection.execute(result)
+    return 1
+
 def load_model(id, hyperparams):
     model_type = 'rf' if id == 1 else 'lr'
     logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
@@ -45,10 +42,9 @@ def load_model(id, hyperparams):
         return False
     return model_
 
-def fit_model(train_data, train_target, id, hyperparams):
+def fit_model(train_data, train_target, id, hyperparams, status_value):
 
     logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
-    # bytes_io = io.BytesIO()
     try:
         if id == 1:
             model_type = 'rf'
@@ -60,20 +56,17 @@ def fit_model(train_data, train_target, id, hyperparams):
             return 0
     except ValueError:
         return 0
-    logs = model_type + logs
+    logs = model_type + '_' + logs
     model_.fit(train_data, train_target)
-    # pickle.dump(model_, bytes_io)#, pickle.HIGHEST_PROTOCOL)
-    raw = pickle.dumps(model_)#, pickle.HIGHEST_PROTOCOL)
+    row = pickle.dumps(model_)
     statement = select(Weights).where(Weights.model == logs)
     result = connection.execute(statement).fetchone() 
     if (result):
-        # bytes_io.seek(0) 
-        statement = update(Weights).values(model = logs, parameters = raw)
-        # statement = update(Weights).values(model = logs, parameters = psycopg2.Binary(bytes_io))
+        statement = update(Weights).where(Weights.model == logs).values(parameters = row)
         connection.execute(statement) 
+        status_value['status'] = 'refited'
     else:
-        # bytes_io.seek(0) 
-        statement = insert(Weights).values(model = logs, parameters = raw)
-        # statement = insert(Weights).values(model = logs, parameters = psycopg2.Binary(bytes_io))
+        statement = insert(Weights).values(model = logs, parameters = row)
         connection.execute(statement)
+        status_value['status'] = 'fited'
     return 1
