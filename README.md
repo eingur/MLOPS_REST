@@ -15,7 +15,7 @@
 ### Пример использования
 конструктор докер образа 
  
- docker build . eingur/mlops_ml:0.1
+ docker build . -t eingur/mlops_ml:0.1
  
  docker-compose up -d
  
