@@ -18,3 +18,5 @@ class Weights(Base):
 
     model = Column(String, primary_key=True)
     parameters = Column(BYTEA)
+
+Base.metadata.create_all(bind = engine)

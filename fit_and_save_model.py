@@ -5,6 +5,7 @@ import joblib
 import pandas as pd
 import pickle
 import io
+import psycopg2
 from sqlalchemy import select, insert, update
 
 from db.db import connection, Weights
@@ -39,35 +40,40 @@ def load_model(id, hyperparams):
     if result:
         result = connection.execute(statement)
         for _, parameters in result:
-            model_ = pickle.load(parameters)
+            model_ = pickle.loads(parameters)
     else:
         return False
     return model_
 
 def fit_model(train_data, train_target, id, hyperparams):
 
-
     logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
-    bytes_io = io.BytesIO()
-    if id == 1:
-        model_type = 'rf'
-        model_ = RandomForestClassifier(**hyperparams)
-    elif id == 2:
-        model_type = 'lr'
-        model_ = LogisticRegression(**hyperparams)
-    else:
+    # bytes_io = io.BytesIO()
+    try:
+        if id == 1:
+            model_type = 'rf'
+            model_ = RandomForestClassifier(**hyperparams)
+        elif id == 2:
+            model_type = 'lr'
+            model_ = LogisticRegression(**hyperparams)
+        else:
+            return 0
+    except ValueError:
         return 0
     logs = model_type + logs
     model_.fit(train_data, train_target)
-    pickle.dump(model_, bytes_io, pickle.HIGHEST_PROTOCOL)
-    bytes_io.seek(0)
+    # pickle.dump(model_, bytes_io)#, pickle.HIGHEST_PROTOCOL)
+    raw = pickle.dumps(model_)#, pickle.HIGHEST_PROTOCOL)
     statement = select(Weights).where(Weights.model == logs)
     result = connection.execute(statement).fetchone() 
     if (result):
-
-        statement = update(Weights).values(model = logs, parameters = bytes_io)
+        # bytes_io.seek(0) 
+        statement = update(Weights).values(model = logs, parameters = raw)
+        # statement = update(Weights).values(model = logs, parameters = psycopg2.Binary(bytes_io))
         connection.execute(statement) 
     else:
-        statement = insert(Weights).values(model = logs, parameters = bytes_io)
-        connection.execute(statement) 
+        # bytes_io.seek(0) 
+        statement = insert(Weights).values(model = logs, parameters = raw)
+        # statement = insert(Weights).values(model = logs, parameters = psycopg2.Binary(bytes_io))
+        connection.execute(statement)
     return 1

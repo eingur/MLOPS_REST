@@ -28,7 +28,7 @@ def get_path(path, id):
         return None
 
 
-@api.route('/')
+@api.route('/models')
 class Descr(Resource):
     def get(self):
         """Get available models"""
@@ -45,8 +45,8 @@ class Descr(Resource):
         abort(404, "File {} doesn't exist".format(path))
 
 parser = reqparse.RequestParser()
-parser.add_argument('data', type=json.loads, help='data for predict')
-parser.add_argument('parameters',json.loads)
+parser.add_argument('data', type = json.loads,location='json', required = True, help='data for predict')
+parser.add_argument('parameters',type = json.loads,location='json', required = True)
 
 @api.route('/prediction/<int:id>')
 class Prediction(Resource):
@@ -54,7 +54,7 @@ class Prediction(Resource):
              responses={200: 'Request is correct', 400: 'Bad request'})
     def post(self, id):
         """Get prediction with posted data"""
-        args = parser.parse_args()#request.json
+        args = request.json#parser.parse_args()#request.json
         params = args['parameters']
         model = load_model(id,params)
         # path = get_path(main_path, id)
@@ -65,12 +65,9 @@ class Prediction(Resource):
             return "model with params {} isn't fitted or mismatch.".format(params), 404
         else :
             try:
-                data_ = args['data']#request.json
-                print(data_)
-                query = pd.DataFrame(data_)
-                query.columns = rnd_columns
-                predict = list(model.predict(query))
-                return jsonify({'prediction': predict})
+                data_ = pd.DataFrame.from_dict(json.loads(args['data']),orient='columns')
+                predict = model.predict(data_)
+                return jsonify({'prediction': predict.tolist()})
             except:
                 return jsonify({'trace': traceback.format_exc()})
 
@@ -82,8 +79,9 @@ class Fitting(Resource):
     def post(self, id):
         args = request.json#(force=True)
         train_data = pd.DataFrame.from_dict(json.loads(args['train_data']), orient="columns")
-        train_target = pd.DataFrame.from_dict(json.loads(args['train_target']), orient="index")
-        params = args['params']
+        train_target = pd.DataFrame.from_dict(json.loads(args['train_target']), orient="columns")
+        params = args['parameters']
+        # return jsonify({'train_shape':train_data.shape,'target_shape':train_target.shape})
 
         flag = fit_model(train_data, train_target, id, params)
         if flag == 1:
