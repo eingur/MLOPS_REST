@@ -54,8 +54,6 @@ def predict_model(id : int, hyperparams : dict, data):
     model_type = get_id(id)
     logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
     logs = model_type +'_'+ logs
-    print(logs)
-    print(f"type load = {type(load_model)}")
     model = load_model(logs)
     return model.predict(data)
 

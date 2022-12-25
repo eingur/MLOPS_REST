@@ -17,9 +17,7 @@ logs_bad = 'rf_n_estimators_100'
 @pytest.fixture()
 def fixture_replace_load_bad():
     _model = pickle.load(open('tests/'+logs_bad+'.json','rb'))
-    print(f" is ok {_model} {type(_model)}")
     yield _model
-    print(f"stil ok")
     
 logs = 'lr_penalty_l2_C_0.3'
 @pytest.fixture()
