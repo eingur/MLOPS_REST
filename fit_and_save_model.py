@@ -53,7 +53,9 @@ def load_model(logs : str):
 def predict_model(id : int, hyperparams : dict, data):
     model_type = get_id(id)
     logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
-    logs = model_type + logs
+    logs = model_type +'_'+ logs
+    print(logs)
+    print(f"type load = {type(load_model)}")
     model = load_model(logs)
     return model.predict(data)
 
@@ -61,7 +63,7 @@ def fit_model(train_data, train_target, id : int, hyperparams : dict, status_val
 
     logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
     model_type = get_id(id)
-    classifier = clf(hyperparams, id)
+    classifier = clf(id, hyperparams)
     logs = model_type + '_' + logs
     classifier.model_.fit(train_data, train_target)
     row = pickle.dumps(classifier.model_)
@@ -70,9 +72,9 @@ def fit_model(train_data, train_target, id : int, hyperparams : dict, status_val
     if (result):
         statement = update(Weights).where(Weights.model == logs).values(parameters = row)
         connection.execute(statement) 
-        status_value['status'] = 'refited'
+        status_value['status'] = 'refitted'
     else:
         statement = insert(Weights).values(model = logs, parameters = row)
         connection.execute(statement)
-        status_value['status'] = 'fited'
+        status_value['status'] = 'fitted'
     return 1
