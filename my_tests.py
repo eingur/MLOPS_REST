@@ -12,10 +12,10 @@ test_bad_params_lr = {'penalty':'l3','C':0.3}
 test_bad_params_rf = {{'max_depth':'a','n_estimators':100}}
 test_bad_params = {'penalty':'l3','n_estimators':100}
 
-logs = 'lr_bad'
+logs_bad = 'rf_n_estimators_100'
 @pytest.fixture()
 def load_model_replace_bad():
-    yield pickle.load(open('tests/'+logs+'.json','rb'))
+    yield pickle.load(open('tests/'+logs_bad+'.json','rb'))
 
 logs = 'lr_penalty_l2_C_0.3'
 @pytest.fixture()

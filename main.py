@@ -68,8 +68,10 @@ class Prediction(Resource):
 
 @api.route('/refit/<int:id>')
 class Fitting(Resource):
-#   @api.doc(params = {'id':{'type':int, 'default':1},})
+    @api.doc(params={'id': {'description': '1 :  RandomForestClassifier, 2 : LogisticRegression', 'type': int, 'default': 1}},
+             responses={200: 'Request is correct', 400: 'Bad request'})
     def post(self, id):
+        """Fit model """
         args = request.json
         train_data = pd.DataFrame.from_dict(json.loads(args['train_data']), orient="columns")
         train_target = pd.DataFrame.from_dict(json.loads(args['train_target']), orient="columns")
