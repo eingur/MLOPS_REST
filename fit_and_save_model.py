@@ -12,53 +12,59 @@ from db.db import connection, Weights
 
 main_path = os.getcwd()+'\\models\\'
 
+class clf():
+    def __init__(self,id : int, hyperparams : dict = {}):
+        self.id = id
+        if self.id == 1:
+            self.model = RandomForestClassifier(**hyperparams)
+        elif self.id == 2:
+            self.model = LogisticRegression(**hyperparams)
+        else:
+            raise ValueError('not determined type of model.') 
+    
 def get_id(id):
     if id == 1:
         return 'rf'
-    else:
+    elif id == 2:
         return 'lr'
+    else:
+        return None
 
 def load_all_models():
     statement = select([Weights.model])
     result = connection.execute(statement).fetchall()
     return [v[0] for v in result]
 
-def delete_models(model_type):
+def delete_models(model_type : str):
     result = delete(Weights).where(Weights.retired.notilike(f'%{model_type}%'))
     connection.execute(result)
     return 1
 
-def load_model(id, hyperparams):
-    model_type = 'rf' if id == 1 else 'lr'
-    logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
-    logs = model_type + logs
+def load_model(logs : str):
     statement = select(Weights).where(Weights.model == logs)
     result = connection.execute(statement).fetchone() 
     if result:
         result = connection.execute(statement)
         for _, parameters in result:
-            model_ = pickle.loads(parameters)
+            return pickle.loads(parameters)
     else:
         return False
-    return model_
 
-def fit_model(train_data, train_target, id, hyperparams, status_value):
+def predict_model(id : int, hyperparams : dict, data):
+    model_type = get_id(id)
+    logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
+    logs = model_type + logs
+    model = load_model(logs)
+    return model.predict(data)
+
+def fit_model(train_data, train_target, id : int, hyperparams : dict, status_value : dict):
 
     logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
-    try:
-        if id == 1:
-            model_type = 'rf'
-            model_ = RandomForestClassifier(**hyperparams)
-        elif id == 2:
-            model_type = 'lr'
-            model_ = LogisticRegression(**hyperparams)
-        else:
-            return 0
-    except ValueError:
-        return 0
+    model_type = get_id(id)
+    classifier = clf(hyperparams, id)
     logs = model_type + '_' + logs
-    model_.fit(train_data, train_target)
-    row = pickle.dumps(model_)
+    classifier.model_.fit(train_data, train_target)
+    row = pickle.dumps(classifier.model_)
     statement = select(Weights).where(Weights.model == logs)
     result = connection.execute(statement).fetchone() 
     if (result):

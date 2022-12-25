@@ -53,17 +53,16 @@ class Prediction(Resource):
         """Get prediction with posted data"""
         args = request.json#parser.parse_args()#request.json
         params = args['parameters']
-        model = load_model(id,params)
-
-        if not model:
-            return "model with params {} isn't fitted or mismatch.".format(params), 404
-        else :
-            try:
-                data_ = pd.DataFrame.from_dict(json.loads(args['data']),orient='columns')
-                predict = model.predict(data_)
+        try:
+            data_ = pd.DataFrame.from_dict(json.loads(args['data']),orient='columns')
+            predict = predict_model(id, params, data_)
+            
+            if not predict:
+                return "model with params {} isn't fitted or mismatch.".format(params), 404
+            else :
                 return jsonify({'prediction': predict.tolist()})
-            except:
-                return jsonify({'trace': traceback.format_exc()}), 400
+        except:
+            return jsonify({'trace': traceback.format_exc()}), 400
 
 
 
