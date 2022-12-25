@@ -13,23 +13,6 @@ from db.db import connection, Weights
 main_path = os.getcwd()+'\\models\\'
 
 
-# def fit_model(train_data, train_target, id, params):
-#     path = main_path
-#     try:
-#         if id == 1:
-#             type = 'rf'
-#             model = RandomForestClassifier(**params)
-#         elif id == 2:
-#             type = 'lr'
-#             model = LogisticRegression(**params)
-#         else:
-#             return 0
-#         model.fit(train_data, train_target)
-#         logs = '_'.join([str(k)+'_'+str(v) for k, v in params.items()])
-#         pickle.dump(model, open(path + type + '\\' + logs + '.pkl', 'wb'))
-#         return 1
-#     except:
-#         return 0
 def load_model(id, hyperparams):
     model_type = 'rf' if id == 1 else 'lr'
     logs = '_'.join([str(k)+'_'+str(v) for k, v in hyperparams.items()])
